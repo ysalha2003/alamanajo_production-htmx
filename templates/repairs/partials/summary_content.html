@@ -1,0 +1,126 @@
+<!-- Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+    <!-- Total Cost Card -->
+    <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-green-100 text-sm font-medium">Total Collected</p>
+                <p class="text-3xl font-bold">€{{ total_cost|floatformat:2 }}</p>
+                <p class="text-green-100 text-xs mt-1">{{ jobs_with_cost_count }} paid job{{ jobs_with_cost_count|pluralize }}</p>
+            </div>
+            <div class="bg-green-400 bg-opacity-50 rounded-full p-3">
+                <i class="fas fa-euro-sign text-2xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Jobs Count Card -->
+    <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-blue-100 text-sm font-medium">Total Jobs</p>
+                <p class="text-3xl font-bold">{{ total_jobs_count }}</p>
+                <p class="text-blue-100 text-xs mt-1">In selected period</p>
+            </div>
+            <div class="bg-blue-400 bg-opacity-50 rounded-full p-3">
+                <i class="fas fa-clipboard-list text-2xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Average Cost Card -->
+    <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-purple-100 text-sm font-medium">Average Cost</p>
+                <p class="text-3xl font-bold">€{{ average_cost|floatformat:2 }}</p>
+                <p class="text-purple-100 text-xs mt-1">Per paid job</p>
+            </div>
+            <div class="bg-purple-400 bg-opacity-50 rounded-full p-3">
+                <i class="fas fa-chart-bar text-2xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="grid grid-cols-1 gap-6 md:gap-8 mb-8">
+    <!-- Daily Breakdown (if applicable) -->
+    {% if daily_breakdown %}
+    <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+        <h3 class="text-xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-chart-line text-amber-500 mr-2"></i>Daily Revenue Trend
+        </h3>
+        <div class="space-y-3">
+            {% for day in daily_breakdown %}
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                    <span class="font-medium text-gray-800">{{ day.date|date:"M d" }}</span>
+                    <span class="text-sm text-gray-500 ml-2">{{ day.date|date:"l" }}</span>
+                </div>
+                <div class="text-right">
+                    <div class="font-bold text-gray-900">€{{ day.total|floatformat:2 }}</div>
+                    <div class="text-sm text-gray-500">{{ day.count }} job{{ day.count|pluralize }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- High-Value Jobs -->
+{% if high_value_jobs %}
+<div class="bg-white rounded-xl shadow-lg p-6 md:p-8 mb-8">
+    <h3 class="text-xl font-bold text-gray-800 mb-6">
+        <i class="fas fa-trophy text-amber-500 mr-2"></i>High-Value Jobs (€100+)
+        {% if filter_type and filter_type != 'all' %}
+        <span class="text-sm font-normal text-gray-500">in selected period</span>
+        {% endif %}
+    </h3>
+    <div class="space-y-4">
+        {% for job in high_value_jobs %}
+        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-300 cursor-pointer"
+             onclick="window.location.href='{% url 'job_detail' job.job_id %}'">
+            <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-star text-amber-500"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900">{{ job.job_id }}</p>
+                    <p class="text-sm text-gray-600">{{ job.customer_name }}</p>
+                    <p class="text-xs text-gray-500">{{ job.created_at|date:"d/m/Y H:i" }}</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-lg font-bold text-green-600">€{{ job.estimated_cost|floatformat:2 }}</p>
+                <span class="px-2 py-1 text-xs font-medium rounded-full {{ job.get_status_display_color }}">
+                    {{ job.get_status_display }}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Summary Statistics -->
+<div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+    <h3 class="text-xl font-bold text-gray-800 mb-6">
+        <i class="fas fa-calculator text-amber-500 mr-2"></i>Period Statistics
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="text-center p-4 bg-green-50 rounded-lg">
+            <div class="text-2xl font-bold text-green-600 mb-1">€{{ highest_job_cost|floatformat:2 }}</div>
+            <div class="text-sm text-green-700">Highest Single Job</div>
+        </div>
+        <div class="text-center p-4 bg-blue-50 rounded-lg">
+            <div class="text-2xl font-bold text-blue-600 mb-1">€{{ lowest_job_cost|floatformat:2 }}</div>
+            <div class="text-sm text-blue-700">Lowest Single Job</div>
+        </div>
+        <div class="text-center p-4 bg-purple-50 rounded-lg">
+            <div class="text-2xl font-bold text-purple-600 mb-1">€{{ median_cost|floatformat:2 }}</div>
+            <div class="text-sm text-purple-700">Median Job Cost</div>
+        </div>
+    </div>
+</div>

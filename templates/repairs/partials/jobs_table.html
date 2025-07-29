@@ -1,0 +1,381 @@
+<!-- Jobs Table - Desktop -->
+<div class="hidden md:block bg-white rounded-lg shadow overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button type="button"
+                                class="text-gray-500 hover:text-amber-600 transition duration-300 flex items-center"
+                                hx-get="{% url 'dashboard_content' %}"
+                                hx-target="#dashboard-content"
+                                hx-include="[name='search'], [name='status'], [name='show_completed']"
+                                hx-vals='{"sort": "{% if sort_by == 'job_id' %}-job_id{% else %}job_id{% endif %}"}'
+                                hx-indicator=".htmx-indicator">
+                            Job 
+                            {% if sort_by == 'job_id' %}
+                                <i class="fas fa-sort-up ml-1"></i>
+                            {% elif sort_by == '-job_id' %}
+                                <i class="fas fa-sort-down ml-1"></i>
+                            {% else %}
+                                <i class="fas fa-sort ml-1"></i>
+                            {% endif %}
+                        </button>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button type="button"
+                                class="text-gray-500 hover:text-amber-600 transition duration-300 flex items-center"
+                                hx-get="{% url 'dashboard_content' %}"
+                                hx-target="#dashboard-content"
+                                hx-include="[name='search'], [name='status'], [name='show_completed']"
+                                hx-vals='{"sort": "{% if sort_by == 'customer_name' %}-customer_name{% else %}customer_name{% endif %}"}'
+                                hx-indicator=".htmx-indicator">
+                            Customer 
+                            {% if sort_by == 'customer_name' %}
+                                <i class="fas fa-sort-up ml-1"></i>
+                            {% elif sort_by == '-customer_name' %}
+                                <i class="fas fa-sort-down ml-1"></i>
+                            {% else %}
+                                <i class="fas fa-sort ml-1"></i>
+                            {% endif %}
+                        </button>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button type="button"
+                                class="text-gray-500 hover:text-amber-600 transition duration-300 flex items-center"
+                                hx-get="{% url 'dashboard_content' %}"
+                                hx-target="#dashboard-content"
+                                hx-include="[name='search'], [name='status'], [name='show_completed']"
+                                hx-vals='{"sort": "{% if sort_by == 'status' %}-status{% else %}status{% endif %}"}'
+                                hx-indicator=".htmx-indicator">
+                            Status 
+                            {% if sort_by == 'status' %}
+                                <i class="fas fa-sort-up ml-1"></i>
+                            {% elif sort_by == '-status' %}
+                                <i class="fas fa-sort-down ml-1"></i>
+                            {% else %}
+                                <i class="fas fa-sort ml-1"></i>
+                            {% endif %}
+                        </button>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button type="button"
+                                class="text-gray-500 hover:text-amber-600 transition duration-300 flex items-center"
+                                hx-get="{% url 'dashboard_content' %}"
+                                hx-target="#dashboard-content"
+                                hx-include="[name='search'], [name='status'], [name='show_completed']"
+                                hx-vals='{"sort": "{% if sort_by == 'estimated_repair_time' %}-estimated_repair_time{% else %}estimated_repair_time{% endif %}"}'
+                                hx-indicator=".htmx-indicator">
+                            Est. Time 
+                            {% if sort_by == 'estimated_repair_time' %}
+                                <i class="fas fa-sort-up ml-1"></i>
+                            {% elif sort_by == '-estimated_repair_time' %}
+                                <i class="fas fa-sort-down ml-1"></i>
+                            {% else %}
+                                <i class="fas fa-sort ml-1"></i>
+                            {% endif %}
+                        </button>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button type="button"
+                                class="text-gray-500 hover:text-amber-600 transition duration-300 flex items-center"
+                                hx-get="{% url 'dashboard_content' %}"
+                                hx-target="#dashboard-content"
+                                hx-include="[name='search'], [name='status'], [name='show_completed']"
+                                hx-vals='{"sort": "{% if sort_by == 'estimated_cost' %}-estimated_cost{% else %}estimated_cost{% endif %}"}'
+                                hx-indicator=".htmx-indicator">
+                            Cost 
+                            {% if sort_by == 'estimated_cost' %}
+                                <i class="fas fa-sort-up ml-1"></i>
+                            {% elif sort_by == '-estimated_cost' %}
+                                <i class="fas fa-sort-down ml-1"></i>
+                            {% else %}
+                                <i class="fas fa-sort ml-1"></i>
+                            {% endif %}
+                        </button>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button type="button"
+                                class="text-gray-500 hover:text-amber-600 transition duration-300 flex items-center"
+                                hx-get="{% url 'dashboard_content' %}"
+                                hx-target="#dashboard-content"
+                                hx-include="[name='search'], [name='status'], [name='show_completed']"
+                                hx-vals='{"sort": "{% if sort_by == 'created_at' %}-created_at{% else %}created_at{% endif %}"}'
+                                hx-indicator=".htmx-indicator">
+                            Date 
+                            {% if sort_by == 'created_at' %}
+                                <i class="fas fa-sort-up ml-1"></i>
+                            {% elif sort_by == '-created_at' %}
+                                <i class="fas fa-sort-down ml-1"></i>
+                            {% else %}
+                                <i class="fas fa-sort ml-1"></i>
+                            {% endif %}
+                        </button>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <button type="button"
+                                class="text-gray-500 hover:text-amber-600 transition duration-300 flex items-center"
+                                hx-get="{% url 'dashboard_content' %}"
+                                hx-target="#dashboard-content"
+                                hx-include="[name='search'], [name='status'], [name='show_completed']"
+                                hx-vals='{"sort": "{% if sort_by == 'created_by__username' %}-created_by__username{% else %}created_by__username{% endif %}"}'
+                                hx-indicator=".htmx-indicator">
+                            Created By 
+                            {% if sort_by == 'created_by__username' %}
+                                <i class="fas fa-sort-up ml-1"></i>
+                            {% elif sort_by == '-created_by__username' %}
+                                <i class="fas fa-sort-down ml-1"></i>
+                            {% else %}
+                                <i class="fas fa-sort ml-1"></i>
+                            {% endif %}
+                        </button>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for job in page_obj %}
+                <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location.href='{% url 'job_detail' job.job_id %}'">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">{{ job.job_id }}</div>
+                            {% if job.photos.count > 0 %}
+                                <div class="text-xs text-gray-500">
+                                    <i class="fas fa-camera"></i> {{ job.photos.count }} photo{{ job.photos.count|pluralize }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">{{ job.customer_name }}</div>
+                            <div class="text-sm text-gray-500">{{ job.phone_number }}</div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ job.get_status_display_color }}">
+                            {{ job.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {% if job.estimated_repair_time == 'TODAY' %}
+                            <span class="text-red-600 font-semibold">
+                                <i class="fas fa-clock mr-1"></i>Today
+                            </span>
+                        {% else %}
+                            {{ job.get_estimated_repair_time_display }}
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {% if job.estimated_cost %}€{{ job.estimated_cost }}{% else %}-{% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ job.created_at|date:"d/m/Y H:i" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {% if job.created_by %}
+                            <div class="flex items-center">
+                                <i class="fas fa-user text-amber-500 mr-1"></i>
+                                <span class="font-medium">{{ job.created_by.username }}</span>
+                            </div>
+                            {% if job.created_by.get_full_name %}
+                                <div class="text-xs text-gray-500">{{ job.created_by.get_full_name }}</div>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-gray-400 italic">System</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <a href="{% url 'receipt' job.job_id %}" 
+                           class="text-gray-600 hover:text-gray-900"
+                           onclick="event.stopPropagation();">
+                            <i class="fas fa-receipt"></i> Receipt
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                        <i class="fas fa-inbox text-4xl mb-4"></i>
+                        <p>No repair jobs found.</p>
+                        {% if show_completed != 'true' %}
+                            <p class="text-sm mt-2">
+                                <button type="button"
+                                        class="text-amber-600 hover:text-amber-800"
+                                        hx-get="{% url 'dashboard_content' %}"
+                                        hx-target="#dashboard-content"
+                                        hx-include="[name='search'], [name='status'], [name='sort']"
+                                        hx-vals='{"show_completed": "true"}'
+                                        hx-indicator=".htmx-indicator">
+                                    Show completed jobs
+                                </button>
+                            </p>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Jobs Cards - Mobile -->
+<div class="md:hidden space-y-4">
+    {% for job in page_obj %}
+    <div class="bg-white rounded-lg shadow p-4 cursor-pointer" onclick="window.location.href='{% url 'job_detail' job.job_id %}'">
+        <div class="flex justify-between items-start mb-3">
+            <div>
+                <h3 class="font-bold text-gray-900">{{ job.job_id }}</h3>
+                <p class="text-sm text-gray-600">{{ job.customer_name }}</p>
+                <p class="text-xs text-gray-500">{{ job.phone_number }}</p>
+            </div>
+            <span class="px-2 py-1 text-xs font-semibold rounded-full {{ job.get_status_display_color }}">
+                {{ job.get_status_display }}
+            </span>
+        </div>
+        
+        <div class="space-y-1 text-sm mb-3">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Date:</span>
+                <span class="text-gray-900">{{ job.created_at|date:"d/m/Y H:i" }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Est. Time:</span>
+                <span class="text-gray-900">
+                    {% if job.estimated_repair_time == 'TODAY' %}
+                        <span class="text-red-600 font-semibold">
+                            <i class="fas fa-clock mr-1"></i>Today
+                        </span>
+                    {% else %}
+                        {{ job.get_estimated_repair_time_display }}
+                    {% endif %}
+                </span>
+            </div>
+            {% if job.estimated_cost %}
+            <div class="flex justify-between">
+                <span class="text-gray-500">Cost:</span>
+                <span class="text-gray-900">€{{ job.estimated_cost }}</span>
+            </div>
+            {% endif %}
+            <div class="flex justify-between">
+                <span class="text-gray-500">Created By:</span>
+                <span class="text-gray-900">
+                    {% if job.created_by %}
+                        <i class="fas fa-user text-amber-500 mr-1"></i>{{ job.created_by.username }}
+                    {% else %}
+                        <span class="text-gray-400 italic">System</span>
+                    {% endif %}
+                </span>
+            </div>
+            {% if job.photos.count > 0 %}
+            <div class="flex justify-between">
+                <span class="text-gray-500">Photos:</span>
+                <span class="text-gray-900">
+                    <i class="fas fa-camera"></i> {{ job.photos.count }}
+                </span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="flex">
+            <a href="{% url 'receipt' job.job_id %}" 
+               class="flex-1 bg-gray-500 hover:bg-gray-600 text-white text-center py-2 px-3 rounded text-sm transition duration-300 touch-target"
+               onclick="event.stopPropagation();">
+                <i class="fas fa-receipt"></i> Receipt
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+        <i class="fas fa-inbox text-4xl mb-4"></i>
+        <p>No repair jobs found.</p>
+        {% if show_completed != 'true' %}
+            <p class="text-sm mt-2">
+                <button type="button"
+                        class="text-amber-600 hover:text-amber-800"
+                        hx-get="{% url 'dashboard_content' %}"
+                        hx-target="#dashboard-content"
+                        hx-include="[name='search'], [name='status'], [name='sort']"
+                        hx-vals='{"show_completed": "true"}'
+                        hx-indicator=".htmx-indicator">
+                    Show completed jobs
+                </button>
+            </p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-6 rounded-lg shadow">
+    <div class="flex-1 flex justify-between sm:hidden">
+        {% if page_obj.has_previous %}
+            <button type="button"
+                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 touch-target"
+                    hx-get="{% url 'dashboard_content' %}"
+                    hx-target="#dashboard-content"
+                    hx-include="[name='search'], [name='status'], [name='sort'], [name='show_completed']"
+                    hx-vals='{"page": "{{ page_obj.previous_page_number }}"}'
+                    hx-indicator=".htmx-indicator">
+                Previous
+            </button>
+        {% endif %}
+        {% if page_obj.has_next %}
+            <button type="button"
+                    class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 touch-target"
+                    hx-get="{% url 'dashboard_content' %}"
+                    hx-target="#dashboard-content"
+                    hx-include="[name='search'], [name='status'], [name='sort'], [name='show_completed']"
+                    hx-vals='{"page": "{{ page_obj.next_page_number }}"}'
+                    hx-indicator=".htmx-indicator">
+                Next
+            </button>
+        {% endif %}
+    </div>
+    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm text-gray-700">
+                Showing
+                <span class="font-medium">{{ page_obj.start_index }}</span>
+                to
+                <span class="font-medium">{{ page_obj.end_index }}</span>
+                of
+                <span class="font-medium">{{ page_obj.paginator.count }}</span>
+                results
+            </p>
+        </div>
+        <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                {% if page_obj.has_previous %}
+                    <button type="button"
+                            class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 touch-target"
+                            hx-get="{% url 'dashboard_content' %}"
+                            hx-target="#dashboard-content"
+                            hx-include="[name='search'], [name='status'], [name='sort'], [name='show_completed']"
+                            hx-vals='{"page": "{{ page_obj.previous_page_number }}"}'
+                            hx-indicator=".htmx-indicator">
+                        <i class="fas fa-angle-left"></i>
+                    </button>
+                {% endif %}
+                
+                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                    {{ page_obj.number }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                    <button type="button"
+                            class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 touch-target"
+                            hx-get="{% url 'dashboard_content' %}"
+                            hx-target="#dashboard-content"
+                            hx-include="[name='search'], [name='status'], [name='sort'], [name='show_completed']"
+                            hx-vals='{"page": "{{ page_obj.next_page_number }}"}'
+                            hx-indicator=".htmx-indicator">
+                        <i class="fas fa-angle-right"></i>
+                    </button>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+</div>
+{% endif %}

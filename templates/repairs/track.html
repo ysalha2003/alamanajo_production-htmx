@@ -1,0 +1,612 @@
+{% extends 'base.html' %}
+
+{% block title %}Track Repair - Alamana Jo{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+
+    {% if not repair_job %}
+    <!-- Tracking Form -->
+    <div class="bg-white rounded-xl shadow-lg p-4 md:p-8">
+        <div class="text-center mb-6 md:mb-8">
+            {% if auto_lookup %}
+                <i class="fas fa-qrcode text-5xl md:text-6xl text-green-500 mb-4"></i>
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800">QR Code Scan Detected</h2>
+                <p class="text-gray-600 mt-2">We couldn't find your repair job. Please verify the details below.</p>
+            {% else %}
+                <i class="fas fa-magnifying-glass-location text-5xl md:text-6xl text-amber-500 mb-4"></i>
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Track Your Repair</h2>
+                <p class="text-gray-600 mt-2">Enter your job details to check the status</p>
+            {% endif %}
+        </div>
+
+        <form hx-post="{% url 'track_repair' %}"
+              hx-target="#tracking-form-container"
+              hx-swap="outerHTML"
+              hx-indicator=".htmx-indicator"
+              class="space-y-4 md:space-y-6"
+              id="tracking-form-container">
+            {% csrf_token %}
+
+            <div>
+                <label for="{{ form.job_id.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-hashtag fa-fw"></i> {{ form.job_id.label }}
+                </label>
+                {{ form.job_id }}
+                <p class="mt-1 text-xs text-gray-500">Found on your receipt (e.g., AJ-1001).</p>
+                {% if form.job_id.errors %}
+                    <div class="mt-1 text-red-600 text-sm">{{ form.job_id.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.phone_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-phone fa-fw"></i> {{ form.phone_number.label }}
+                </label>
+                {{ form.phone_number }}
+                <p class="mt-1 text-xs text-gray-500">The phone number you provided at drop-off.</p>
+                {% if form.phone_number.errors %}
+                    <div class="mt-1 text-red-600 text-sm">{{ form.phone_number.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 md:gap-4 pt-4 border-t border-gray-200">
+                <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300 touch-target">
+                    <i class="fas fa-search"></i> Track Repair
+                    <span class="htmx-indicator ml-2">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                </button>
+                <a href="{% url 'home' %}" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg text-center transition duration-300 touch-target">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+            </div>
+        </form>
+
+        <div class="mt-6 md:mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <h3 class="font-medium text-gray-800 mb-2">
+                <i class="fas fa-question-circle text-amber-500"></i> Need Help?
+            </h3>
+            <div class="text-sm text-gray-600 space-y-1">
+                <p>• <strong>QR Code:</strong> Scan the code on your receipt for instant access</p>
+                <p>• <strong>Manual Entry:</strong> Use the form above with your Job ID and phone</p>
+                <p>• <strong>Can't find your job?</strong> Call us at <strong>{{ shop_phone }}</strong></p>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Repair Status Display -->
+    <div class="bg-white rounded-xl shadow-lg p-4 md:p-8">
+        {% if auto_lookup %}
+        <!-- QR Code Success Message -->
+        <div class="text-center mb-4 md:mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <i class="fas fa-qrcode text-3xl text-green-600 mb-2"></i>
+            <h3 class="text-lg font-bold text-green-800">QR Code Scanned Successfully!</h3>
+            <p class="text-sm text-green-700">Your repair status is displayed below</p>
+        </div>
+        {% endif %}
+
+        <div class="text-center mb-6 md:mb-8">
+             <i class="fas fa-receipt text-5xl md:text-6xl text-amber-500 mb-4"></i>
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Repair Status</h2>
+            <p class="text-gray-600 mt-2">Job ID: <span class="font-bold text-amber-600">{{ repair_job.job_id }}</span></p>
+        </div>
+
+        <!-- Status Card -->
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 md:p-6 mb-6 md:mb-8">
+            <div class="text-center">
+                <div class="text-3xl md:text-4xl mb-3">
+                    {% if repair_job.status == 'RECEIVED' %}<i class="fas fa-box text-blue-500"></i>
+                    {% elif repair_job.status == 'DIAGNOSED' %}<i class="fas fa-stethoscope text-cyan-500"></i>
+                    {% elif repair_job.status == 'IN_PROGRESS' %}<i class="fas fa-cogs text-orange-500 animate-spin" style="animation-duration: 3s;"></i>
+                    {% elif repair_job.status == 'WAITING_PARTS' %}<i class="fas fa-clock text-purple-500"></i>
+                    {% elif repair_job.status == 'READY' %}<i class="fas fa-check-circle text-green-500"></i>
+                    {% elif repair_job.status == 'COMPLETED' %}<i class="fas fa-flag-checkered text-gray-800"></i>
+                    {% endif %}
+                </div>
+                <h3 class="text-xl md:text-2xl font-bold {{ repair_job.get_status_display_color }} px-3 md:px-4 py-2 rounded-full inline-block">
+                    {{ repair_job.get_status_display }}
+                </h3>
+                 <p class="text-xs text-gray-500 mt-4">
+                    Last updated: {{ repair_job.updated_at|date:"d/m/Y H:i" }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Job Details -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-x-8 md:gap-y-6 mb-6 md:mb-8 pb-6 md:pb-8 border-b border-gray-200">
+            <div class="space-y-3 md:space-y-4">
+                <div>
+                    <span class="block text-sm font-medium text-gray-500">Job ID</span>
+                    <span class="text-lg md:text-xl font-bold text-amber-600 cursor-pointer hover:text-amber-700"
+                          id="trackingJobId"
+                          title="Tap to copy Job ID"
+                          onclick="copyJobId()">{{ repair_job.job_id }} <i class="far fa-copy text-xs"></i></span>
+                </div>
+                <div>
+                    <span class="block text-sm font-medium text-gray-500">Customer</span>
+                    <span class="text-base md:text-lg text-gray-800">{{ repair_job.customer_name }}</span>
+                </div>
+                <div>
+                    <span class="block text-sm font-medium text-gray-500">Date Received</span>
+                    <span class="text-base md:text-lg text-gray-800">{{ repair_job.created_at|date:"d/m/Y" }}</span>
+                </div>
+            </div>
+
+            <div class="space-y-3 md:space-y-4">
+                 {% if repair_job.estimated_cost %}
+                <div>
+                    <span class="block text-sm font-medium text-gray-500">Estimated Cost</span>
+                    <span class="text-base md:text-lg font-semibold text-gray-800">€{{ repair_job.estimated_cost }}</span>
+                </div>
+                {% endif %}
+                {% if repair_job.bike_description %}
+                <div class="md:col-span-2">
+                    <span class="block text-sm font-medium text-gray-500">Bike Description</span>
+                    <p class="text-sm text-gray-700 bg-gray-50 p-2 md:p-3 rounded mt-1">{{ repair_job.bike_description }}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if repair_job.repair_details %}
+            <div class="md:col-span-2">
+                <span class="block text-sm font-medium text-gray-500">Repair Details / Notes</span>
+                <p class="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border mt-1">{{ repair_job.repair_details }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Status-specific Messages -->
+        {% if repair_job.status == 'READY' %}
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-800 p-4 rounded-r-lg mb-4 md:mb-6" role="alert">
+            <div class="flex items-start">
+                <div class="text-xl md:text-2xl mr-3 md:mr-4 mt-1"><i class="fas fa-calendar-check"></i></div>
+                <div>
+                    <h4 class="font-bold text-base md:text-lg">Your e-bike is ready for pickup!</h4>
+                    <p class="mt-1 text-sm">Please call ahead to arrange a convenient pickup time. Note our storage policy for items left over 14 days.</p>
+                </div>
+            </div>
+        </div>
+        {% elif repair_job.status == 'WAITING_PARTS' %}
+        <div class="bg-purple-100 border-l-4 border-purple-500 text-purple-800 p-4 rounded-r-lg mb-4 md:mb-6" role="alert">
+            <div class="flex items-start">
+                 <div class="text-xl md:text-2xl mr-3 md:mr-4 mt-1"><i class="fas fa-box-open"></i></div>
+                <div>
+                    <h4 class="font-bold text-base md:text-lg">Waiting for parts</h4>
+                    <p class="mt-1 text-sm">We're waiting for specific parts to arrive. We will resume the repair as soon as they are in stock.</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 mt-6 md:mt-8 pt-4 md:pt-6 border-t border-gray-200">
+            <button type="button"
+                    class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 md:py-3 px-4 rounded-lg text-center transition duration-300 touch-target"
+                    hx-get="{% url 'track_repair' %}"
+                    hx-target="#tracking-form-container"
+                    hx-swap="outerHTML">
+                <i class="fas fa-search"></i> Track Another Repair
+            </button>
+            <button onclick="shareStatus()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 md:py-3 px-4 rounded-lg transition duration-300 touch-target">
+                <i class="fas fa-share"></i> Share Status
+            </button>
+            <a href="{% url 'home' %}" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 md:py-3 px-4 rounded-lg text-center transition duration-300 touch-target">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Comprehensive Multilingual Policy Section -->
+    <div class="mt-8 md:mt-12 bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-gradient-to-r from-amber-500 to-amber-600 p-4 md:p-6 text-white text-center">
+            <h3 class="text-xl md:text-2xl font-bold mb-2">
+                <i class="fas fa-file-contract mr-2"></i>Alamana Jo Repair & Storage Policy
+            </h3>
+            <p class="text-amber-100">Important terms and conditions for all customers</p>
+        </div>
+
+        <!-- Language Selector -->
+        <div class="p-4 md:p-6 border-b border-gray-200">
+            <div class="flex flex-wrap justify-center gap-2 md:gap-3">
+                <button onclick="showLanguage('en')" id="lang-en" class="lang-btn bg-amber-500 text-white px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition duration-300 touch-target">
+                    English
+                </button>
+                <button onclick="showLanguage('nl')" id="lang-nl" class="lang-btn bg-gray-200 text-gray-700 hover:bg-gray-300 px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition duration-300 touch-target">
+                    Nederlands
+                </button>
+                <button onclick="showLanguage('fr')" id="lang-fr" class="lang-btn bg-gray-200 text-gray-700 hover:bg-gray-300 px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition duration-300 touch-target">
+                    Français
+                </button>
+                <button onclick="showLanguage('ar')" id="lang-ar" class="lang-btn bg-gray-200 text-gray-700 hover:bg-gray-300 px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition duration-300 touch-target">
+                    العربية
+                </button>
+                <button onclick="showLanguage('he')" id="lang-he" class="lang-btn bg-gray-200 text-gray-700 hover:bg-gray-300 px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition duration-300 touch-target">
+                    עברית
+                </button>
+            </div>
+        </div>
+
+        <!-- English Policy -->
+        <div id="policy-en" class="policy-content p-4 md:p-6">
+            <div class="space-y-4 md:space-y-6">
+                <div class="border-l-4 border-amber-500 pl-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-warehouse text-amber-500 mr-2"></i>1. Storage Fee
+                    </h4>
+                    <p class="text-gray-700">After <strong>14 days</strong> from the date of repair completion, a <strong>€2 per day</strong> storage fee will apply.</p>
+                </div>
+
+                <div class="border-l-4 border-red-500 pl-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>2. Abandoned Items
+                    </h4>
+                    <p class="text-gray-700">If your e-scooter or e-bike is <strong>not picked up within 3 months</strong>, it will be considered abandoned and cannot be claimed.</p>
+                </div>
+
+                <div class="border-l-4 border-blue-500 pl-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-id-card text-blue-500 mr-2"></i>3. Receipt or ID Required
+                    </h4>
+                    <p class="text-gray-700">You must present your <strong>receipt</strong> to collect your item.</p>
+                    <ul class="list-disc list-inside mt-2 ml-4 text-gray-600 space-y-1">
+                        <li>If you lose the receipt, you must show a <strong>valid ID</strong>.</li>
+                        <li>If needed, you may also be asked to <strong>show the SMS confirmation</strong> we sent as proof.</li>
+                    </ul>
+                </div>
+
+                <div class="border-l-4 border-green-500 pl-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-users text-green-500 mr-2"></i>4. Third-Party Pickup
+                    </h4>
+                    <p class="text-gray-700">A friend or family member may pick up your item <strong>only if they have your receipt or a clear SMS confirmation</strong>.</p>
+                </div>
+
+                <div class="border-l-4 border-purple-500 pl-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-tools text-purple-500 mr-2"></i>5. Inspection & Check-Up Fee
+                    </h4>
+                    <p class="text-gray-700">By leaving your scooter or bike with us, you agree that we may <strong>inspect and repair it if needed</strong>.</p>
+                    <p class="text-gray-700 mt-2">If you decide <strong>not to proceed with the repair</strong>, a <strong>check-up fee of €25—€50</strong> will be charged.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dutch Policy -->
+        <div id="policy-nl" class="policy-content p-4 md:p-6 hidden">
+            <div class="space-y-4 md:space-y-6">
+                <div class="border-l-4 border-amber-500 pl-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-warehouse text-amber-500 mr-2"></i>1. Opslagkosten
+                    </h4>
+                    <p class="text-gray-700">Na <strong>14 dagen</strong> vanaf de datum van voltooiing van de reparatie, geldt er een opslagkost van <strong>€2 per dag</strong>.</p>
+                </div>
+
+                <div class="border-l-4 border-red-500 pl-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>2. Achtergelaten Voorwerpen
+                    </h4>
+                    <p class="text-gray-700">Als uw e-scooter of e-bike <strong>niet wordt opgehaald binnen 3 maanden</strong>, wordt deze als achtergelaten beschouwd en kan deze niet meer worden opgeëist.</p>
+                </div>
+
+                <div class="border-l-4 border-blue-500 pl-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-id-card text-blue-500 mr-2"></i>3. Kasticket of ID Vereist
+                    </h4>
+                    <p class="text-gray-700">U moet uw <strong>kasticket</strong> tonen om uw voorwerp op te halen.</p>
+                    <ul class="list-disc list-inside mt-2 ml-4 text-gray-600 space-y-1">
+                        <li>Als u het kasticket verliest, moet u een <strong>geldige identiteitskaart</strong> tonen.</li>
+                        <li>Indien nodig, kan u ook gevraagd worden om <strong>de SMS-bevestiging</strong> die wij verstuurden als bewijs te tonen.</li>
+                    </ul>
+                </div>
+
+                <div class="border-l-4 border-green-500 pl-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-users text-green-500 mr-2"></i>4. Ophaling door Derden
+                    </h4>
+                    <p class="text-gray-700">Een vriend of familielid mag uw voorwerp alleen ophalen <strong>als zij uw kasticket of een duidelijke SMS-bevestiging hebben</strong>.</p>
+                </div>
+
+                <div class="border-l-4 border-purple-500 pl-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-tools text-purple-500 mr-2"></i>5. Inspectie & Controlekosten
+                    </h4>
+                    <p class="text-gray-700">Door uw scooter of fiets bij ons achter te laten, gaat u ermee akkoord dat wij deze <strong>mogen inspecteren en indien nodig repareren</strong>.</p>
+                    <p class="text-gray-700 mt-2">Als u besluit <strong>niet door te gaan met de reparatie</strong>, worden er <strong>controlekosten van €25—€50</strong> aangerekend.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- French Policy -->
+        <div id="policy-fr" class="policy-content p-4 md:p-6 hidden">
+            <div class="space-y-4 md:space-y-6">
+                <div class="border-l-4 border-amber-500 pl-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-warehouse text-amber-500 mr-2"></i>1. Frais de Stockage
+                    </h4>
+                    <p class="text-gray-700">Après <strong>14 jours</strong> à partir de la date d'achèvement de la réparation, des frais de stockage de <strong>€2 par jour</strong> s'appliqueront.</p>
+                </div>
+
+                <div class="border-l-4 border-red-500 pl-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>2. Objets Abandonnés
+                    </h4>
+                    <p class="text-gray-700">Si votre e-scooter ou e-vélo <strong>n'est pas récupéré dans les 3 mois</strong>, il sera considéré comme abandonné et ne pourra plus être réclamé.</p>
+                </div>
+
+                <div class="border-l-4 border-blue-500 pl-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-id-card text-blue-500 mr-2"></i>3. Reçu ou Pièce d'Identité Requis
+                    </h4>
+                    <p class="text-gray-700">Vous devez présenter votre <strong>reçu</strong> pour récupérer votre article.</p>
+                    <ul class="list-disc list-inside mt-2 ml-4 text-gray-600 space-y-1">
+                        <li>Si vous perdez le reçu, vous devez montrer une <strong>pièce d'identité valide</strong>.</li>
+                        <li>Si nécessaire, il pourrait aussi vous être demandé de <strong>montrer la confirmation SMS</strong> que nous avons envoyée comme preuve.</li>
+                    </ul>
+                </div>
+
+                <div class="border-l-4 border-green-500 pl-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-users text-green-500 mr-2"></i>4. Récupération par un Tiers
+                    </h4>
+                    <p class="text-gray-700">Un ami ou un membre de la famille peut récupérer votre article <strong>seulement s'il a votre reçu ou une confirmation SMS claire</strong>.</p>
+                </div>
+
+                <div class="border-l-4 border-purple-500 pl-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-tools text-purple-500 mr-2"></i>5. Frais d'Inspection et de Contrôle
+                    </h4>
+                    <p class="text-gray-700">En laissant votre scooter ou vélo chez nous, vous acceptez que nous puissions <strong>l'inspecter et le réparer si nécessaire</strong>.</p>
+                    <p class="text-gray-700 mt-2">Si vous décidez de <strong>ne pas procéder à la réparation</strong>, des <strong>frais de contrôle de €25—€50</strong> seront facturés.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Arabic Policy -->
+        <div id="policy-ar" class="policy-content p-4 md:p-6 hidden" dir="rtl">
+            <div class="space-y-4 md:space-y-6">
+                <div class="border-r-4 border-amber-500 pr-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-warehouse text-amber-500 ml-2"></i>1. رسوم التخزين
+                    </h4>
+                    <p class="text-gray-700">بعد <strong>14 يوماً</strong> من تاريخ اكتمال الإصلاح، ستطبق رسوم تخزين قدرها <strong>€2 يومياً</strong>.</p>
+                </div>
+
+                <div class="border-r-4 border-red-500 pr-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-exclamation-triangle text-red-500 ml-2"></i>2. الأشياء المهجورة
+                    </h4>
+                    <p class="text-gray-700">إذا لم يتم استلام سكوترك الكهربائي أو دراجتك الكهربائية <strong>خلال 3 أشهر</strong>، فستعتبر مهجورة ولا يمكن المطالبة بها.</p>
+                </div>
+
+                <div class="border-r-4 border-blue-500 pr-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-id-card text-blue-500 ml-2"></i>3. الإيصال أو الهوية مطلوبة
+                    </h4>
+                    <p class="text-gray-700">يجب عليك إبراز <strong>الإيصال</strong> لاستلام الجهاز.</p>
+                    <ul class="list-disc list-inside mt-2 mr-4 text-gray-600 space-y-1">
+                        <li>في حالة فقدان الإيصال، يجب إبراز <strong>هوية صالحة</strong>.</li>
+                        <li>عند الضرورة، قد يُطلب منك أيضاً <strong>إبراز تأكيد الرسالة النصية</strong> التي أرسلناها كدليل.</li>
+                    </ul>
+                </div>
+
+                <div class="border-r-4 border-green-500 pr-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-users text-green-500 ml-2"></i>4. الاستلام بواسطة طرف ثالث
+                    </h4>
+                    <p class="text-gray-700">يمكن لصديق أو فرد من العائلة استلام الدراجة <strong>فقط إذا كان لديهم إيصالك أو تأكيد الرسالة النصية الواضح</strong>.</p>
+                </div>
+
+                <div class="border-r-4 border-purple-500 pr-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-tools text-purple-500 ml-2"></i>5. رسوم الفحص والمراجعة
+                    </h4>
+                    <p class="text-gray-700">بترك سكوترك أو دراجتك عندنا، توافق على أنه يمكننا <strong>فحصها وإصلاحها عند الحاجة</strong>.</p>
+                    <p class="text-gray-700 mt-2">إذا قررت <strong>عدم المتابعة مع الإصلاح</strong>, ستُفرض <strong>رسوم مراجعة قدرها €25—€50</strong>.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hebrew Policy -->
+        <div id="policy-he" class="policy-content p-4 md:p-6 hidden" dir="rtl">
+            <div class="space-y-4 md:space-y-6">
+                <div class="border-r-4 border-amber-500 pr-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-warehouse text-amber-500 ml-2"></i>1. דמי אחסון
+                    </h4>
+                    <p class="text-gray-700">לאחר <strong>14 ימים</strong> מתאריך השלמת התיקון, יחולו דמי אחסון של <strong>€2 ליום</strong>.</p>
+                </div>
+
+                <div class="border-r-4 border-red-500 pr-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-exclamation-triangle text-red-500 ml-2"></i>2. פריטים נטושים
+                    </h4>
+                    <p class="text-gray-700">אם הקטנוע החשמלי או האופניים החשמליים שלך <strong>לא ייאספו תוך 3 חודשים</strong>, הם ייחשבו כנטושים ולא ניתן יהיה לתבוע אותם.</p>
+                </div>
+
+                <div class="border-r-4 border-blue-500 pr-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-id-card text-blue-500 ml-2"></i>3. קבלה או תעודת זהות נדרשת
+                    </h4>
+                    <p class="text-gray-700">עליך להציג את <strong>הקבלה</strong> כדי לאסוף את הפריט שלך.</p>
+                    <ul class="list-disc list-inside mt-2 mr-4 text-gray-600 space-y-1">
+                        <li>אם איבדת את הקבלה, עליך להציג <strong>תעודת זהות תקפה</strong>.</li>
+                        <li>במידת הצורך, ייתכן שתתבקש גם <strong>להציג את אישור ה-SMS</strong> ששלחנו כהוכחה.</li>
+                    </ul>
+                </div>
+
+                <div class="border-r-4 border-green-500 pr-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-users text-green-500 ml-2"></i>4. איסוף על ידי צד שלישי
+                    </h4>
+                    <p class="text-gray-700">חבר או בן משפחה יכולים לאסוף את הפריט שלך <strong>רק אם יש להם את הקבלה שלך או אישור SMS ברור</strong>.</p>
+                </div>
+
+                <div class="border-r-4 border-purple-500 pr-4">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">
+                        <i class="fas fa-tools text-purple-500 ml-2"></i>5. דמי בדיקה ובחינה
+                    </h4>
+                    <p class="text-gray-700">על ידי השארת הקטנוע או האופניים שלך אצלנו, אתה מסכים שאנחנו יכולים <strong>לבדוק ולתקן אותם במידת הצורך</strong>.</p>
+                    <p class="text-gray-700 mt-2">אם תחליט <strong>שלא להמשיך עם התיקון</strong>, יחויבו <strong>דמי בדיקה של €25—€50</strong>.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Important Notice Footer -->
+        <div class="bg-amber-50 border-t border-amber-200 p-4 md:p-6">
+            <div class="flex items-start space-x-3">
+                <i class="fas fa-info-circle text-amber-600 text-xl mt-1 flex-shrink-0"></i>
+                <div>
+                    <h4 class="font-bold text-amber-800 mb-2">Important Notice</h4>
+                    <p class="text-amber-700 text-sm">By leaving your e-bike or e-scooter with us for repair, you acknowledge that you have read, understood, and agree to abide by these terms and conditions. These policies are in accordance with Belgian consumer protection laws.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop Information -->
+    <div class="mt-8 md:mt-12 bg-white rounded-xl shadow-lg p-4 md:p-8">
+        <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6 text-center">Why Choose Alamana Jo?</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+            <div class="text-center">
+                <i class="fas fa-bolt text-3xl md:text-4xl text-amber-500 mb-3"></i>
+                <h4 class="font-bold text-gray-800 mb-2">Expert Service</h4>
+                <p class="text-gray-600 text-sm">Specialized in e-bike repairs and maintenance</p>
+            </div>
+            <div class="text-center">
+                <i class="fas fa-mobile-alt text-3xl md:text-4xl text-amber-500 mb-3"></i>
+                <h4 class="font-bold text-gray-800 mb-2">QR Code Tracking</h4>
+                <p class="text-gray-600 text-sm">Instant status updates with QR code scanning</p>
+            </div>
+            <div class="text-center">
+                <i class="fas fa-award text-3xl md:text-4xl text-amber-500 mb-3"></i>
+                <h4 class="font-bold text-gray-800 mb-2">Quality Guarantee</h4>
+                <p class="text-gray-600 text-sm">Professional service you can trust</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyJobId() {
+    const jobId = "{{ repair_job.job_id }}";
+
+    // Try modern clipboard API first
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(jobId).then(() => {
+            showMessage('✅ Job ID copied: ' + jobId);
+        }, () => {
+            // Fallback for older browsers
+            fallbackCopyTextToClipboard(jobId);
+        });
+    } else {
+        // Fallback for older browsers
+        fallbackCopyTextToClipboard(jobId);
+    }
+}
+
+function shareStatus() {
+    const jobId = "{{ repair_job.job_id }}";
+    const customerName = "{{ repair_job.customer_name }}";
+    const status = "{{ repair_job.get_status_display }}";
+    const trackingUrl = window.location.href;
+
+    const message = `Alamana Jo - E-Bike Repair Status\n\nJob ID: ${jobId}\nCustomer: ${customerName}\nStatus: ${status}\n\nTrack online: ${trackingUrl}`;
+
+    // Try native sharing first (mobile)
+    if (navigator.share) {
+        navigator.share({
+            title: 'E-Bike Repair Status',
+            text: message,
+            url: trackingUrl
+        }).catch(() => {
+            // Fallback to WhatsApp
+            shareWhatsApp(message);
+        });
+    } else {
+        // Fallback to WhatsApp
+        shareWhatsApp(message);
+    }
+}
+
+function shareWhatsApp(message) {
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+}
+
+function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showMessage('✅ Job ID copied: ' + text);
+        } else {
+            showMessage('❌ Failed to copy Job ID.');
+        }
+    } catch (err) {
+        showMessage('❌ Failed to copy Job ID.');
+    }
+
+    document.body.removeChild(textArea);
+}
+
+function showMessage(text) {
+    // Remove any existing message
+    const existingMessage = document.getElementById('copy-message');
+    if (existingMessage) {
+        document.body.removeChild(existingMessage);
+    }
+
+    const messageDiv = document.createElement('div');
+    messageDiv.id = 'copy-message';
+    messageDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300';
+    messageDiv.textContent = text;
+    document.body.appendChild(messageDiv);
+
+    setTimeout(() => {
+        messageDiv.style.opacity = '0';
+        setTimeout(() => {
+            if (document.body.contains(messageDiv)) {
+                document.body.removeChild(messageDiv);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Language switcher functionality
+function showLanguage(lang) {
+    // Hide all policy content
+    const allPolicies = document.querySelectorAll('.policy-content');
+    allPolicies.forEach(policy => policy.classList.add('hidden'));
+
+    // Show selected language policy
+    document.getElementById(`policy-${lang}`).classList.remove('hidden');
+
+    // Update button styles
+    const allButtons = document.querySelectorAll('.lang-btn');
+    allButtons.forEach(btn => {
+        btn.className = 'lang-btn bg-gray-200 text-gray-700 hover:bg-gray-300 px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition duration-300 touch-target';
+    });
+
+    // Highlight active button
+    document.getElementById(`lang-${lang}`).className = 'lang-btn bg-amber-500 text-white px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition duration-300 touch-target';
+}
+
+// Initialize with English on page load
+document.addEventListener('DOMContentLoaded', function() {
+    showLanguage('en');
+});
+</script>
+
+{% endblock %}

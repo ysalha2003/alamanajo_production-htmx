@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt - {{ repair_job.job_id }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #F3F4F6;
+        }
+        
+        /* Print Styles - Critical for A4 compatibility */
+        @page {
+            size: A4;
+            margin: 1cm;
+            -webkit-print-color-adjust: exact;
+            color-adjust: exact;
+        }
+        
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            body {
+                margin: 0 !important;
+                padding: 0 !important;
+                font-size: 11px !important;
+                line-height: 1.3 !important;
+                background-color: #FFFFFF !important;
+                color: #000000 !important;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .receipt-container {
+                border: none !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                page-break-inside: avoid !important;
+                background-color: #FFFFFF !important;
+                max-width: none !important;
+                width: 100% !important;
+            }
+            
+            .policy-section {
+                border: 2px solid #F59E0B !important;
+                background-color: #FFFBEB !important;
+                page-break-inside: avoid !important;
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            .header-section {
+                border-bottom: 2px solid #E5E7EB !important;
+                padding-bottom: 10px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            .qr-section {
+                border: 1px solid #D1D5DB !important;
+                background-color: #F9FAFB !important;
+                padding: 10px !important;
+                margin: 10px 0 !important;
+                text-align: center !important;
+            }
+            
+            /* Ensure all borders and colors print correctly */
+            .border-gray-200 { border-color: #E5E7EB !important; }
+            .border-amber-500 { border-color: #F59E0B !important; }
+            .bg-amber-50 { background-color: #FFFBEB !important; }
+            .bg-gray-50 { background-color: #F9FAFB !important; }
+            .text-amber-600 { color: #D97706 !important; }
+            .text-amber-800 { color: #92400E !important; }
+            .text-amber-500 { color: #F59E0B !important; }
+            
+            /* Safari specific fixes */
+            img {
+                max-width: 100% !important;
+                height: auto !important;
+                -webkit-print-color-adjust: exact !important;
+            }
+            
+            .footer-section {
+                border-top: 2px solid #E5E7EB !important;
+                padding-top: 10px !important;
+                margin-top: 15px !important;
+            }
+        }
+        
+        @media screen {
+            .receipt-container {
+                max-width: 21cm;
+                min-height: 29.7cm;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-4">
+        <div class="max-w-md mx-auto">
+            <div class="bg-white rounded-xl shadow-lg receipt-container border-2 border-dashed border-gray-300 p-6">
+
+                <!-- Header -->
+                <header class="text-center mb-4 pb-4 border-b-2 border-gray-200 header-section">
+                    <h1 class="text-3xl font-bold text-gray-800">
+                        <i class="fas fa-tools text-amber-500"></i> Alamana Jo
+                    </h1>
+                    <div class="text-xs text-gray-500 mt-2 space-y-1">
+                        <p><i class="fas fa-map-marker-alt fa-fw"></i> 
+                            <a href="https://www.google.com/maps/search/?api=1&query=Quellinstraat+45,+2018+Antwerpen" 
+                               target="_blank" 
+                               class="text-gray-500 hover:text-amber-500 transition duration-300">
+                               Quellinstraat 45, 2018 Antwerpen
+                            </a>
+                        </p>
+                        
+                    </div>
+                </header>
+
+                <div class="border-b border-gray-200 py-3 mb-4">
+                    <h2 class="text-lg font-bold text-center text-gray-700">
+                        <i class="fas fa-receipt"></i> Repair Job Receipt
+                    </h2>
+                </div>
+
+                <!-- Job Details -->
+                <div class="space-y-3 mb-4 text-sm">
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-600">Job ID:</span>
+                        <span class="font-bold text-amber-600 text-base">{{ repair_job.job_id }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-600">Customer:</span>
+                        <span class="text-gray-800">{{ repair_job.customer_name }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-600">Phone:</span>
+                        <span class="text-gray-800">{{ repair_job.phone_number }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-600">Date:</span>
+                        <span class="text-gray-800">{{ repair_job.created_at|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    {% if repair_job.estimated_cost %}
+                    
+                    {% endif %}
+                    
+                </div>
+
+                <!-- Track & Collect Section with Instant QR Code -->
+                <div class="bg-gray-50 rounded-lg p-3 mb-4 text-center border border-gray-200 qr-section">
+                    <h4 class="font-bold text-gray-800 mb-2 text-sm">
+                        <i class="fas fa-qrcode"></i> Instant Status Check
+                    </h4>
+                    <div class="bg-white p-2 rounded border inline-block">
+                        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="w-24 h-24 mx-auto">
+                    </div>
+                    <div class="text-xs text-gray-700 space-y-1 mt-3">
+                                                <p><i class="fas fa-check-circle text-green-500"></i> Keep this receipt for pickup</p>
+                        <p><i class="fas fa-exclamation-circle text-amber-500"></i> Call ahead: +32 (499) 89-0237</p>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500 border-t border-gray-300 pt-2">
+                        <p>Manual tracking: <span class="font-mono text-amber-600">alamanajo.eu/track/</span></p>
+                    </div>
+                </div>
+
+                <!-- Policy Section -->
+                <div class="policy-section bg-amber-50 border-2 border-amber-500 rounded-lg p-4 mb-4">
+                    <h4 class="font-bold text-amber-800 text-center mb-3 text-sm">
+                        <i class="fas fa-exclamation-triangle"></i> Repair & Storage Policy
+                    </h4>
+                    <div class="space-y-2 text-xs text-amber-900">
+                        <p><strong>1. Storage Fee:</strong> A <strong>€2/day</strong> fee applies to items left for over 14 days post-repair completion notification.</p>
+                        <p><strong>2. Unclaimed Items:</strong> Items left for over <strong>3 months</strong> will be considered abandoned and may be sold to cover costs.</p>
+                        <p><strong>3. Collection:</strong> You must present this receipt for collection. Without it, a valid photo ID and SMS confirmation are required.</p>
+                        <p><strong>4. Third-Party Pickup:</strong> Another person can only collect your item if they present this original receipt.</p>
+                        <p><strong>5. Diagnostic Fee:</strong> A non-refundable fee of <strong>€25-€50</strong> is charged if you decline repairs after our diagnostic inspection.</p>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-amber-300">
+                        <p class="text-xs font-bold text-amber-800 text-center">Leaving your item with us implies full agreement to these terms.</p>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="text-center pt-4 border-t-2 border-gray-200 footer-section">
+                    <p class="text-sm font-bold text-gray-800">Thank you for choosing Alamana Jo!</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons (Screen Only) -->
+            <div class="text-center mt-6 space-y-3 no-print">
+                <button onclick="window.print()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    <i class="fas fa-print"></i> Print Receipt
+                </button>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <a href="{{ tracking_url }}" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg text-center transition duration-300">
+                        <i class="fas fa-eye"></i> View Status Now
+                    </a>
+                    <a href="{% url 'home' %}" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg text-center transition duration-300">
+                        <i class="fas fa-arrow-left"></i> Back to Home
+                    </a>
+                </div>
+                <div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <h3 class="font-medium text-green-800 mb-1 flex items-center justify-center">
+                        <i class="fas fa-lightbulb mr-2"></i> QR Code Benefits
+                    </h3>
+                    <div class="text-sm text-green-700 space-y-1">
+                        <p>✓ Instant status check - no typing required</p>
+                        <p>✓ Works with any smartphone camera</p>
+                        <p>✓ Always up-to-date repair information</p>
+                        <p>✓ Share with family/friends for pickup</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyJobId() {
+            const jobId = "{{ repair_job.job_id }}";
+            navigator.clipboard.writeText(jobId).then(() => showMessage('✅ Job ID copied: ' + jobId), () => showMessage('Failed to copy.'));
+        }
+
+        function shareWhatsApp() {
+            const message = `Alamana Jo - Check My Repair Status\n\nJob ID: {{ repair_job.job_id }}\nCustomer: {{ repair_job.customer_name }}\n\nInstant tracking: {{ tracking_url }}`;
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        function showMessage(text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300';
+            messageDiv.textContent = text;
+            document.body.appendChild(messageDiv);
+            setTimeout(() => {
+                messageDiv.style.opacity = '0';
+                setTimeout(() => document.body.removeChild(messageDiv), 300);
+            }, 3000);
+        }
+
+        window.addEventListener('beforeprint', () => { 
+            document.title = 'Alamana Jo Receipt - {{ repair_job.job_id }}'; 
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.ctrlKey) {
+                if (e.key === 'p') { e.preventDefault(); window.print(); }
+                if (e.key === 'c') { e.preventDefault(); copyJobId(); }
+            }
+        });
+    </script>
+</body>
+</html>

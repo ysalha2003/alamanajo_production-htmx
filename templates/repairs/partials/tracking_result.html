@@ -1,0 +1,112 @@
+<!-- Repair Status Display -->
+<div class="bg-white rounded-xl shadow-lg p-4 md:p-8">
+    <div class="text-center mb-6 md:mb-8">
+         <i class="fas fa-receipt text-5xl md:text-6xl text-amber-500 mb-4"></i>
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Repair Status</h2>
+        <p class="text-gray-600 mt-2">Job ID: <span class="font-bold text-amber-600">{{ repair_job.job_id }}</span></p>
+    </div>
+
+    <!-- Status Card -->
+    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 md:p-6 mb-6 md:mb-8">
+        <div class="text-center">
+            <div class="text-3xl md:text-4xl mb-3">
+                {% if repair_job.status == 'RECEIVED' %}<i class="fas fa-box text-blue-500"></i>
+                {% elif repair_job.status == 'DIAGNOSED' %}<i class="fas fa-stethoscope text-cyan-500"></i>
+                {% elif repair_job.status == 'IN_PROGRESS' %}<i class="fas fa-cogs text-orange-500 animate-spin" style="animation-duration: 3s;"></i>
+                {% elif repair_job.status == 'WAITING_PARTS' %}<i class="fas fa-clock text-purple-500"></i>
+                {% elif repair_job.status == 'READY' %}<i class="fas fa-check-circle text-green-500"></i>
+                {% elif repair_job.status == 'COMPLETED' %}<i class="fas fa-flag-checkered text-gray-800"></i>
+                {% endif %}
+            </div>
+            <h3 class="text-xl md:text-2xl font-bold {{ repair_job.get_status_display_color }} px-3 md:px-4 py-2 rounded-full inline-block">
+                {{ repair_job.get_status_display }}
+            </h3>
+             <p class="text-xs text-gray-500 mt-4">
+                Last updated: {{ repair_job.updated_at|date:"d/m/Y H:i" }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Job Details -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-x-8 md:gap-y-6 mb-6 md:mb-8 pb-6 md:pb-8 border-b border-gray-200">
+        <div class="space-y-3 md:space-y-4">
+            <div>
+                <span class="block text-sm font-medium text-gray-500">Job ID</span>
+                <span class="text-lg md:text-xl font-bold text-amber-600 cursor-pointer hover:text-amber-700"
+                      id="trackingJobId"
+                      title="Tap to copy Job ID"
+                      onclick="copyJobId()">{{ repair_job.job_id }} <i class="far fa-copy text-xs"></i></span>
+            </div>
+            <div>
+                <span class="block text-sm font-medium text-gray-500">Customer</span>
+                <span class="text-base md:text-lg text-gray-800">{{ repair_job.customer_name }}</span>
+            </div>
+            <div>
+                <span class="block text-sm font-medium text-gray-500">Date Received</span>
+                <span class="text-base md:text-lg text-gray-800">{{ repair_job.created_at|date:"d/m/Y" }}</span>
+            </div>
+        </div>
+
+        <div class="space-y-3 md:space-y-4">
+             {% if repair_job.estimated_cost %}
+            <div>
+                <span class="block text-sm font-medium text-gray-500">Estimated Cost</span>
+                <span class="text-base md:text-lg font-semibold text-gray-800">€{{ repair_job.estimated_cost }}</span>
+            </div>
+            {% endif %}
+            {% if repair_job.bike_description %}
+            <div class="md:col-span-2">
+                <span class="block text-sm font-medium text-gray-500">Bike Description</span>
+                <p class="text-sm text-gray-700 bg-gray-50 p-2 md:p-3 rounded mt-1">{{ repair_job.bike_description }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if repair_job.repair_details %}
+        <div class="md:col-span-2">
+            <span class="block text-sm font-medium text-gray-500">Repair Details / Notes</span>
+            <p class="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border mt-1">{{ repair_job.repair_details }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Status-specific Messages -->
+    {% if repair_job.status == 'READY' %}
+    <div class="bg-green-100 border-l-4 border-green-500 text-green-800 p-4 rounded-r-lg mb-4 md:mb-6" role="alert">
+        <div class="flex items-start">
+            <div class="text-xl md:text-2xl mr-3 md:mr-4 mt-1"><i class="fas fa-calendar-check"></i></div>
+            <div>
+                <h4 class="font-bold text-base md:text-lg">Your e-bike is ready for pickup!</h4>
+                <p class="mt-1 text-sm">Please call ahead to arrange a convenient pickup time. Note our storage policy for items left over 14 days.</p>
+            </div>
+        </div>
+    </div>
+    {% elif repair_job.status == 'WAITING_PARTS' %}
+    <div class="bg-purple-100 border-l-4 border-purple-500 text-purple-800 p-4 rounded-r-lg mb-4 md:mb-6" role="alert">
+        <div class="flex items-start">
+             <div class="text-xl md:text-2xl mr-3 md:mr-4 mt-1"><i class="fas fa-box-open"></i></div>
+            <div>
+                <h4 class="font-bold text-base md:text-lg">Waiting for parts</h4>
+                <p class="mt-1 text-sm">We're waiting for specific parts to arrive. We will resume the repair as soon as they are in stock.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-3 mt-6 md:mt-8 pt-4 md:pt-6 border-t border-gray-200">
+        <button type="button"
+                class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 md:py-3 px-4 rounded-lg text-center transition duration-300 touch-target"
+                hx-get="{% url 'track_repair' %}"
+                hx-target="#tracking-form-container"
+                hx-swap="outerHTML">
+            <i class="fas fa-search"></i> Track Another Repair
+        </button>
+        <button onclick="shareStatus()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 md:py-3 px-4 rounded-lg transition duration-300 touch-target">
+            <i class="fas fa-share"></i> Share Status
+        </button>
+        <a href="{% url 'home' %}" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 md:py-3 px-4 rounded-lg text-center transition duration-300 touch-target">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+    </div>
+</div>

@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% block title %}Drop Off E-Bike - Alamana Jo{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-lg p-4 md:p-8">
+        <div class="text-center mb-6 md:mb-8">
+            <i class="fas fa-clipboard-list text-5xl md:text-6xl text-amber-500 mb-4"></i>
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800">E-Bike Drop-Off</h2>
+            <p class="text-gray-600 mt-2">Fill out the details to register your repair job</p>
+        </div>
+
+        <form hx-post="{% url 'drop_off' %}" 
+              hx-encoding="multipart/form-data"
+              hx-target="#messages-container"
+              hx-swap="innerHTML"
+              hx-indicator=".htmx-indicator"
+              enctype="multipart/form-data" 
+              class="space-y-4 md:space-y-6" 
+              id="dropOffForm">
+            {% csrf_token %}
+
+            <!-- Customer Name -->
+            <div>
+                <label for="{{ form.customer_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-user fa-fw text-amber-500"></i> {{ form.customer_name.label }}
+                </label>
+                {{ form.customer_name }}
+                {% if form.customer_name.errors %}
+                    <div class="mt-1 text-red-600 text-sm flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.customer_name.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Phone Number -->
+            <div>
+                <label for="{{ form.phone_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-phone fa-fw text-amber-500"></i> {{ form.phone_number.label }}
+                </label>
+                {{ form.phone_number }}
+                <p class="mt-1 text-xs text-gray-500">
+                    <i class="fas fa-info-circle"></i> We'll send SMS updates to this number.
+                </p>
+                {% if form.phone_number.errors %}
+                    <div class="mt-1 text-red-600 text-sm flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.phone_number.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Estimated Repair Time -->
+            <div>
+                <label for="{{ form.estimated_repair_time.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-clock fa-fw text-amber-500"></i> {{ form.estimated_repair_time.label }}
+                </label>
+                {{ form.estimated_repair_time }}
+                <p class="mt-1 text-xs text-gray-500">
+                    <i class="fas fa-info-circle"></i> This is an estimate and may change.
+                </p>
+                {% if form.estimated_repair_time.errors %}
+                    <div class="mt-1 text-red-600 text-sm flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.estimated_repair_time.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Bike Description -->
+            <div>
+                <label for="{{ form.bike_description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-bicycle fa-fw text-amber-500"></i> {{ form.bike_description.label }}
+                </label>
+                {{ form.bike_description }}
+                <p class="mt-1 text-xs text-gray-500">
+                    <i class="fas fa-info-circle"></i> Include brand, model, color, and any issues.
+                </p>
+                {% if form.bike_description.errors %}
+                    <div class="mt-1 text-red-600 text-sm flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.bike_description.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Photo Upload -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-camera fa-fw text-amber-500"></i> Photos (Optional)
+                </label>
+                <div class="relative">
+                    <input type="file" name="photos" id="id_photos" multiple accept="image/*" capture="environment"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm">
+                    <div class="mt-2 text-xs text-gray-500">
+                        <i class="fas fa-info-circle"></i> Add photos of the e-bike. Images will be automatically compressed.
+                    </div>
+                </div>
+                <div id="photoPreview" class="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 hidden"></div>
+                <div id="compressionStatus" class="mt-2 text-xs text-blue-600 hidden">
+                    <i class="fas fa-spinner fa-spin mr-1"></i> Compressing images...
+                </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="pt-4 md:pt-6 border-t border-gray-200 flex flex-col sm:flex-row gap-3 md:gap-4">
+                <button type="submit" id="submitBtn" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300 touch-target text-center">
+                    <i class="fas fa-check-circle"></i> Submit Drop-Off
+                    <span class="htmx-indicator ml-2">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                </button>
+                <a href="{% url 'home' %}" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg text-center transition duration-300 touch-target">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Information Card -->
+    <div class="mt-8 bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <h3 class="font-medium text-amber-800 mb-2 flex items-center">
+            <i class="fas fa-info-circle mr-2"></i> What happens next?
+        </h3>
+        <div class="text-sm text-amber-700 space-y-1">
+            <p>• You will receive a receipt with a Job ID and QR code for tracking.</p>
+            <p>• We will inspect your e-bike and provide a cost and time estimate.</p>
+            <p>• You will get SMS updates at key stages of the repair.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const photoInput = document.getElementById('id_photos');
+    const previewContainer = document.getElementById('photoPreview');
+    const compressionStatus = document.getElementById('compressionStatus');
+
+    let compressedFiles = [];
+
+    // Image compression function
+    function compressImage(file, maxWidth = 1920, maxHeight = 1080, quality = 0.8) {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+
+            img.onload = function() {
+                // Calculate new dimensions
+                let { width, height } = img;
+
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = (height * maxWidth) / width;
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = (width * maxHeight) / height;
+                        height = maxHeight;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                // Draw and compress
+                ctx.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob(resolve, 'image/jpeg', quality);
+            };
+
+            img.src = URL.createObjectURL(file);
+        });
+    }
+
+    if (photoInput) {
+        photoInput.addEventListener('change', async function(e) {
+            const files = Array.from(e.target.files);
+
+            if (files.length === 0) {
+                previewContainer.classList.add('hidden');
+                compressedFiles = [];
+                return;
+            }
+
+            compressionStatus.classList.remove('hidden');
+            previewContainer.innerHTML = '';
+            compressedFiles = [];
+
+            previewContainer.classList.remove('hidden');
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+
+                if (file.type.startsWith('image/')) {
+                    try {
+                        // Compress the image
+                        const compressedBlob = await compressImage(file);
+                        const compressedFile = new File([compressedBlob], file.name, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now()
+                        });
+
+                        compressedFiles.push(compressedFile);
+
+                        // Show preview
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const div = document.createElement('div');
+                            div.className = 'relative';
+
+                            const originalSize = (file.size / 1024 / 1024).toFixed(1);
+                            const compressedSize = (compressedFile.size / 1024 / 1024).toFixed(1);
+
+                            div.innerHTML = `
+                                <img src="${e.target.result}" class="w-full h-24 object-cover rounded border">
+                                <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b">
+                                    <div class="truncate">${file.name}</div>
+                                    <div class="text-green-300">${originalSize}MB → ${compressedSize}MB</div>
+                                </div>
+                            `;
+                            previewContainer.appendChild(div);
+                        };
+                        reader.readAsDataURL(compressedFile);
+
+                    } catch (error) {
+                        console.error('Error compressing image:', error);
+                        compressedFiles.push(file); // Use original if compression fails
+                    }
+                }
+            }
+
+            compressionStatus.classList.add('hidden');
+        });
+    }
+
+    // HTMX event listeners for enhanced user experience
+    document.body.addEventListener('htmx:beforeRequest', function(event) {
+        if (event.target.id === 'dropOffForm') {
+            // Handle compressed files if any
+            if (compressedFiles.length > 0) {
+                event.preventDefault();
+
+                // Create new FormData with compressed files
+                const formData = new FormData(event.target);
+
+                // Remove original photos
+                formData.delete('photos');
+
+                // Add compressed photos
+                compressedFiles.forEach(file => {
+                    formData.append('photos', file);
+                });
+
+                // Make the HTMX request manually
+                htmx.ajax('POST', event.target.getAttribute('hx-post'), {
+                    source: event.target,
+                    target: event.target.getAttribute('hx-target'),
+                    swap: event.target.getAttribute('hx-swap'),
+                    values: formData
+                });
+            }
+        }
+    });
+
+    document.body.addEventListener('htmx:responseError', function(event) {
+        console.error('Form submission failed:', event.detail);
+        // Show error message
+        const messagesContainer = document.getElementById('messages-container');
+        messagesContainer.innerHTML = `
+            <div class="alert p-3 md:p-4 rounded-lg mb-3 md:mb-4 bg-red-100 border border-red-400 text-red-700">
+                <div class="flex items-start">
+                    <i class="fas fa-exclamation-circle mr-2 mt-0.5 flex-shrink-0"></i>
+                    <span class="text-sm md:text-base">Form submission failed. Please check your input and try again.</span>
+                </div>
+            </div>
+        `;
+    });
+});
+</script>
+{% endblock %}

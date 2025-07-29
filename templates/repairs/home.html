@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Alamana Jo E-Bike Repair{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Hero Section -->
+    <div class="text-center mb-8 md:mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+            <i class="fas fa-tools text-amber-500"></i> Alamana Jo
+        </h1>
+        <p class="text-lg md:text-xl text-gray-600 mb-2">Professional E-Bike Repair Service</p>
+        <p class="text-gray-500">Fast, reliable, and expert e-bike repairs in Antwerpen</p>
+    </div>
+
+    <!-- Main Action Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8 md:mb-12">
+        <!-- Drop Off Card -->
+        <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 text-center transform hover:scale-105 transition duration-300">
+            <div class="w-12 h-12 md:w-16 md:h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+                <i class="fas fa-cogs text-2xl md:text-3xl text-amber-500"></i>
+            </div>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-3 md:mb-4">Drop Off Your E-Bike</h2>
+            <p class="text-gray-600 mb-4 md:mb-6 text-sm md:text-base">Quick and professional e-bike repair service with real-time tracking</p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'drop_off' %}" class="block w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 md:py-4 px-6 rounded-lg transition duration-300 touch-target">
+                    <i class="fas fa-plus-circle mr-2"></i> Start Repair Request
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}?next={% url 'drop_off' %}" class="block w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 md:py-4 px-6 rounded-lg transition duration-300 touch-target">
+                    <i class="fas fa-sign-in-alt mr-2"></i> Login to Drop Off
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- Tracking Card -->
+        <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 text-center transform hover:scale-105 transition duration-300">
+            <div class="w-12 h-12 md:w-16 md:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+                <i class="fas fa-map-location-dot text-2xl md:text-3xl text-gray-700"></i>
+            </div>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-3 md:mb-4">Track Your Repair</h2>
+            <p class="text-gray-600 mb-4 md:mb-6 text-sm md:text-base">Check the status of your e-bike repair with your Job ID</p>
+            <a href="{% url 'track_repair' %}" class="block w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 md:py-4 px-6 rounded-lg transition duration-300 touch-target">
+                <i class="fas fa-search mr-2"></i> Track Repair Status
+            </a>
+        </div>
+    </div>
+
+    <!-- Services Section -->
+    <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 mb-8 md:mb-12">
+        <h3 class="text-2xl md:text-3xl font-bold text-gray-800 text-center mb-6 md:mb-8">Our Services</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            <div class="text-center">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                    <i class="fas fa-battery-full text-xl md:text-2xl text-amber-500"></i>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-2">Battery Service</h4>
+                <p class="text-gray-600 text-sm">Battery diagnostics, repair, and replacement for all e-bike brands</p>
+            </div>
+            <div class="text-center">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                    <i class="fas fa-cog text-xl md:text-2xl text-amber-500"></i>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-2">Motor Repair</h4>
+                <p class="text-gray-600 text-sm">Expert motor diagnostics and repair services</p>
+            </div>
+            <div class="text-center">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                    <i class="fas fa-wrench text-xl md:text-2xl text-amber-500"></i>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-2">General Maintenance</h4>
+                <p class="text-gray-600 text-sm">Complete tune-ups, brake service, and component replacement</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process Section -->
+    <div class="bg-amber-50 rounded-xl border border-amber-200 p-6 md:p-8 mb-8 md:mb-12">
+        <h3 class="text-2xl md:text-3xl font-bold text-gray-800 text-center mb-6 md:mb-8">How It Works</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            <div class="text-center">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-amber-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                    <span class="font-bold text-sm md:text-base">1</span>
+                </div>
+                <h4 class="font-semibold text-gray-800 mb-2">Drop Off</h4>
+                <p class="text-sm text-gray-600">Bring your e-bike and fill out our simple form</p>
+            </div>
+            <div class="text-center">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-amber-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                    <span class="font-bold text-sm md:text-base">2</span>
+                </div>
+                <h4 class="font-semibold text-gray-800 mb-2">Diagnosis</h4>
+                <p class="text-sm text-gray-600">We inspect and diagnose the issue</p>
+            </div>
+            <div class="text-center">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-amber-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                    <span class="font-bold text-sm md:text-base">3</span>
+                </div>
+                <h4 class="font-semibold text-gray-800 mb-2">Repair</h4>
+                <p class="text-sm text-gray-600">Professional repair with quality parts</p>
+            </div>
+            <div class="text-center">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-amber-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                    <span class="font-bold text-sm md:text-base">4</span>
+                </div>
+                <h4 class="font-semibold text-gray-800 mb-2">Pickup</h4>
+                <p class="text-sm text-gray-600">Get notified when ready for collection</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Info Card -->
+    <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 text-center">
+        <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">Visit Our Shop</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+            <div>
+                <i class="fas fa-map-marker-alt text-2xl md:text-3xl text-amber-500 mb-3"></i>
+                <h4 class="font-semibold text-gray-800 mb-2">Address</h4>
+                <p class="text-gray-600 text-sm">
+                    <a href="https://www.google.com/maps/search/?api=1&query=Quellinstraat+45,+2018+Antwerpen" 
+                       target="_blank" 
+                       class="text-gray-600 hover:text-amber-500 transition duration-300 underline">
+                       Quellinstraat 45<br>2018 Antwerpen
+                    </a>
+                </p>
+            </div>
+            <div>
+                <i class="fas fa-phone text-2xl md:text-3xl text-amber-500 mb-3"></i>
+                <h4 class="font-semibold text-gray-800 mb-2">Phone</h4>
+                <p class="text-gray-600 text-sm">+32 (499) 89-0237</p>
+            </div>
+            <div>
+                <i class="fas fa-clock text-2xl md:text-3xl text-amber-500 mb-3"></i>
+                <h4 class="font-semibold text-gray-800 mb-2">Hours</h4>
+                <p class="text-gray-600 text-sm">Fri-Wed: 11:00-19:00<br><span class="text-red-600">Thu: Closed</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

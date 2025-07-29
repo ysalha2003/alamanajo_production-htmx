@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block title %}Total Summary - Alamana Jo{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6 md:mb-8 flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-chart-line text-amber-500"></i> Financial Summary
+            </h2>
+            <p class="text-gray-600">Overview of collected costs and revenue analysis</p>
+        </div>
+        <div class="htmx-indicator flex items-center text-amber-500">
+            <i class="fas fa-spinner fa-spin mr-2"></i>
+            <span class="text-sm">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Date Filter Section -->
+    <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6 md:mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <!-- Quick Filter Buttons -->
+            <div class="flex flex-wrap gap-2">
+                <h3 class="text-lg font-semibold text-gray-800 w-full lg:w-auto mb-2 lg:mb-0 lg:mr-4">
+                    <i class="fas fa-calendar-alt text-amber-500 mr-2"></i>Quick Filters:
+                </h3>
+                <button type="button"
+                        class="quick-filter-btn bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm transition duration-300 touch-target {% if filter_type == 'today' %}bg-blue-700{% endif %}"
+                        hx-get="{% url 'total_summary_filtered' %}"
+                        hx-target="#summary-content"
+                        hx-vals='{"filter": "today"}'
+                        hx-indicator=".htmx-indicator">
+                    <i class="fas fa-sun mr-1"></i>Today
+                </button>
+                <button type="button"
+                        class="quick-filter-btn bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm transition duration-300 touch-target {% if filter_type == 'week' %}bg-green-700{% endif %}"
+                        hx-get="{% url 'total_summary_filtered' %}"
+                        hx-target="#summary-content"
+                        hx-vals='{"filter": "week"}'
+                        hx-indicator=".htmx-indicator">
+                    <i class="fas fa-calendar-week mr-1"></i>This Week
+                </button>
+                <button type="button"
+                        class="quick-filter-btn bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-lg text-sm transition duration-300 touch-target {% if filter_type == 'month' %}bg-purple-700{% endif %}"
+                        hx-get="{% url 'total_summary_filtered' %}"
+                        hx-target="#summary-content"
+                        hx-vals='{"filter": "month"}'
+                        hx-indicator=".htmx-indicator">
+                    <i class="fas fa-calendar-alt mr-1"></i>This Month
+                </button>
+                <button type="button"
+                        class="quick-filter-btn bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-sm transition duration-300 touch-target {% if filter_type == 'quarter' %}bg-orange-700{% endif %}"
+                        hx-get="{% url 'total_summary_filtered' %}"
+                        hx-target="#summary-content"
+                        hx-vals='{"filter": "quarter"}'
+                        hx-indicator=".htmx-indicator">
+                    <i class="fas fa-calendar-check mr-1"></i>This Quarter
+                </button>
+                <button type="button"
+                        class="quick-filter-btn bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-2 rounded-lg text-sm transition duration-300 touch-target {% if filter_type == 'year' %}bg-indigo-700{% endif %}"
+                        hx-get="{% url 'total_summary_filtered' %}"
+                        hx-target="#summary-content"
+                        hx-vals='{"filter": "year"}'
+                        hx-indicator=".htmx-indicator">
+                    <i class="fas fa-calendar mr-1"></i>This Year
+                </button>
+                <button type="button"
+                        class="quick-filter-btn bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg text-sm transition duration-300 touch-target {% if not filter_type or filter_type == 'all' %}bg-gray-700{% endif %}"
+                        hx-get="{% url 'total_summary_filtered' %}"
+                        hx-target="#summary-content"
+                        hx-vals='{"filter": "all"}'
+                        hx-indicator=".htmx-indicator">
+                    <i class="fas fa-infinity mr-1"></i>All Time
+                </button>
+            </div>
+
+            <!-- Custom Date Range -->
+            <div class="flex flex-col sm:flex-row gap-2 lg:ml-4">
+                <div class="flex items-center gap-2">
+                    <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Custom Range:</label>
+                    <input type="date" 
+                           id="start-date"
+                           name="start_date"
+                           value="{{ start_date|date:'Y-m-d' }}"
+                           class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                    <span class="text-gray-500">to</span>
+                    <input type="date" 
+                           id="end-date"
+                           name="end_date"
+                           value="{{ end_date|date:'Y-m-d' }}"
+                           class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                    <button type="button"
+                            class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm transition duration-300 touch-target"
+                            hx-get="{% url 'total_summary_filtered' %}"
+                            hx-target="#summary-content"
+                            hx-include="#start-date, #end-date"
+                            hx-vals='{"filter": "custom"}'
+                            hx-indicator=".htmx-indicator">
+                        <i class="fas fa-filter mr-1"></i>Apply
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Filter Display -->
+        <div class="mt-4 pt-4 border-t border-gray-200">
+            <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center text-gray-600">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <span>Current filter: 
+                        <strong class="text-gray-800">
+                            {% if filter_type == 'today' %}
+                                Today ({{ start_date|date:"d/m/Y" }})
+                            {% elif filter_type == 'week' %}
+                                This Week ({{ start_date|date:"d/m/Y" }} - {{ end_date|date:"d/m/Y" }})
+                            {% elif filter_type == 'month' %}
+                                This Month ({{ start_date|date:"F Y" }})
+                            {% elif filter_type == 'quarter' %}
+                                This Quarter ({{ start_date|date:"d/m/Y" }} - {{ end_date|date:"d/m/Y" }})
+                            {% elif filter_type == 'year' %}
+                                This Year ({{ start_date|date:"Y" }})
+                            {% elif filter_type == 'custom' %}
+                                Custom Range ({{ start_date|date:"d/m/Y" }} - {{ end_date|date:"d/m/Y" }})
+                            {% else %}
+                                All Time
+                            {% endif %}
+                        </strong>
+                    </span>
+                </div>
+                {% if filter_type and filter_type != 'all' %}
+                <button type="button"
+                        class="text-gray-500 hover:text-gray-700 transition-colors"
+                        hx-get="{% url 'total_summary_filtered' %}"
+                        hx-target="#summary-content"
+                        hx-vals='{"filter": "all"}'
+                        hx-indicator=".htmx-indicator">
+                    <i class="fas fa-times mr-1"></i>Clear Filter
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Content Container -->
+    <div id="summary-content">
+        {% include 'repairs/partials/summary_content.html' %}
+    </div>
+
+    <!-- Back to Dashboard -->
+    <div class="mt-8 text-center">
+        <a href="{% url 'dashboard' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition duration-300 text-center touch-target">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh summary every 60 seconds
+    setInterval(function() {
+        // Get current filter values
+        const startDate = document.getElementById('start-date').value;
+        const endDate = document.getElementById('end-date').value;
+        const activeFilter = document.querySelector('.quick-filter-btn.bg-blue-700, .quick-filter-btn.bg-green-700, .quick-filter-btn.bg-purple-700, .quick-filter-btn.bg-orange-700, .quick-filter-btn.bg-indigo-700, .quick-filter-btn.bg-gray-700');
+        
+        let filterType = 'all';
+        if (activeFilter) {
+            const filterText = activeFilter.textContent.toLowerCase();
+            if (filterText.includes('today')) filterType = 'today';
+            else if (filterText.includes('week')) filterType = 'week';
+            else if (filterText.includes('month')) filterType = 'month';
+            else if (filterText.includes('quarter')) filterType = 'quarter';
+            else if (filterText.includes('year')) filterType = 'year';
+        }
+        
+        // Refresh with current filters
+        htmx.ajax('GET', '{% url "total_summary_filtered" %}', {
+            target: '#summary-content',
+            swap: 'innerHTML',
+            values: {
+                filter: filterType,
+                start_date: startDate,
+                end_date: endDate
+            }
+        });
+    }, 60000); // 60 seconds
+    
+    // Update quick filter button states
+    document.addEventListener('htmx:afterRequest', function(event) {
+        if (event.target.id === 'summary-content') {
+            // Reset all button states
+            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+                btn.className = btn.className.replace(/bg-\w+-700/g, '').replace(/bg-(\w+)-500/g, 'bg-$1-500');
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

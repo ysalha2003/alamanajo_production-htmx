@@ -1,0 +1,183 @@
+<div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <!-- Header -->
+    <div class="bg-red-600 text-white p-6 rounded-t-xl">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="bg-red-500 rounded-full p-3 mr-4">
+                    <i class="fas fa-exclamation-triangle text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold">Confirm Job Deletion</h3>
+                    <p class="text-red-100 text-sm">This action cannot be undone</p>
+                </div>
+            </div>
+            <button type="button" 
+                    onclick="closeDeleteModal()" 
+                    class="text-red-200 hover:text-white transition-colors p-2">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Step 1: Initial Confirmation View -->
+    <div id="initial-delete-view">
+        <div class="p-6">
+            <!-- Warning Message -->
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+                <div class="flex items-start">
+                    <i class="fas fa-exclamation-triangle text-red-500 mr-3 mt-1"></i>
+                    <div>
+                        <h4 class="font-semibold text-red-800 mb-1">Permanent Deletion Warning</h4>
+                        <p class="text-red-700 text-sm">
+                            You are about to permanently delete this repair job and all associated data. 
+                            This action <strong>cannot be reversed</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Job Summary -->
+            <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                <h4 class="font-semibold text-gray-800 mb-3"><i class="fas fa-info-circle text-gray-600 mr-2"></i>Job to be Deleted</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-600">Job ID:</span>
+                            <span class="font-bold text-gray-900">{{ repair_job.job_id }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-600">Customer:</span>
+                            <span class="text-gray-900">{{ repair_job.customer_name }}</span>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                         <div class="flex justify-between">
+                            <span class="font-medium text-gray-600">Photos:</span>
+                            <span class="text-gray-900">
+                                {% if photo_count > 0 %}
+                                    <i class="fas fa-camera text-amber-500 mr-1"></i>{{ photo_count }} photo{{ photo_count|pluralize }}
+                                {% else %}
+                                    No photos
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% if repair_job.estimated_cost %}
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-600">Est. Cost:</span>
+                            <span class="text-gray-900 font-semibold">€{{ repair_job.estimated_cost }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Confirmation Input -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <label class="block font-semibold text-yellow-800 mb-2">
+                    <i class="fas fa-keyboard text-yellow-600 mr-2"></i>
+                    To proceed, type "DELETE {{ repair_job.job_id }}"
+                </label>
+                <input type="text" 
+                       id="delete-confirmation-input"
+                       class="w-full px-3 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                       placeholder="DELETE {{ repair_job.job_id }}"
+                       autocomplete="off">
+            </div>
+        </div>
+        
+        <!-- Footer Actions for Step 1 -->
+        <div class="bg-gray-50 px-6 py-4 rounded-b-xl flex flex-col sm:flex-row gap-3 sm:justify-end">
+            <button type="button" 
+                    onclick="closeDeleteModal()"
+                    class="flex-1 sm:flex-none bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition duration-300 touch-target">
+                <i class="fas fa-times mr-2"></i>Cancel
+            </button>
+            <button type="button" 
+                    id="proceed-to-final-confirm-btn"
+                    onclick="showFinalConfirmation()"
+                    class="flex-1 sm:flex-none bg-red-600 text-white px-6 py-2 rounded-lg transition duration-300 touch-target opacity-50 cursor-not-allowed"
+                    disabled>
+                <i class="fas fa-arrow-right mr-2"></i>Proceed to Final Step
+            </button>
+        </div>
+    </div>
+
+    <!-- Step 2: Final Confirmation View (Initially Hidden) -->
+    <div id="final-confirm-view" class="hidden">
+        <div class="p-8 text-center">
+            <i class="fas fa-skull-crossbones text-red-500 text-6xl mb-4 animate-pulse"></i>
+            <h3 class="text-2xl font-bold text-gray-800">Are you absolutely sure?</h3>
+            <p class="text-gray-600 mt-2">
+                This is the final confirmation. There is no undo.
+                <br>
+                Permanently delete job <strong>{{ repair_job.job_id }}</strong> and all its data?
+            </p>
+        </div>
+
+        <!-- Footer Actions for Step 2 -->
+        <div class="bg-red-50 px-6 py-4 rounded-b-xl flex flex-col sm:flex-row gap-3 sm:justify-end border-t border-red-200">
+            <button type="button"
+                    onclick="hideFinalConfirmation()"
+                    class="flex-1 sm:flex-none bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition duration-300 touch-target">
+                <i class="fas fa-arrow-left mr-2"></i>No, Go Back
+            </button>
+            <button type="button" 
+                    id="final-delete-btn"
+                    class="flex-1 sm:flex-none bg-red-800 hover:bg-black text-white px-6 py-2 rounded-lg transition duration-300 touch-target font-bold"
+                    hx-delete="{% url 'job_delete' repair_job.job_id %}"
+                    hx-target="body"
+                    hx-indicator="#delete-spinner-final">
+                <span id="delete-spinner-final" class="htmx-indicator">
+                    <i class="fas fa-spinner fa-spin mr-2"></i>
+                </span>
+                <i class="fas fa-trash-alt mr-2"></i>Yes, Delete Forever
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // This script runs when the modal content is loaded by HTMX.
+    const initialView = document.getElementById('initial-delete-view');
+    const finalView = document.getElementById('final-confirm-view');
+    const input = document.getElementById('delete-confirmation-input');
+    const proceedBtn = document.getElementById('proceed-to-final-confirm-btn');
+    const expectedText = "DELETE {{ repair_job.job_id }}";
+
+    // --- Functions to switch between modal views ---
+    function showFinalConfirmation() {
+        if (initialView && finalView) {
+            initialView.classList.add('hidden');
+            finalView.classList.remove('hidden');
+        }
+    }
+
+    function hideFinalConfirmation() {
+        if (initialView && finalView) {
+            finalView.classList.add('hidden');
+            initialView.classList.remove('hidden');
+            // Re-focus the input field when going back
+            setTimeout(() => input.focus(), 100);
+        }
+    }
+
+    // --- Input validation logic ---
+    if (input && proceedBtn) {
+        input.addEventListener('input', function() {
+            // Trim whitespace and make the comparison case-insensitive
+            const typedValue = this.value.trim().toUpperCase();
+            const expectedValue = expectedText.trim().toUpperCase();
+
+            if (typedValue === expectedValue) {
+                proceedBtn.disabled = false;
+                proceedBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                proceedBtn.disabled = true;
+                proceedBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        });
+        
+        // Auto-focus the input field on load
+        setTimeout(() => input.focus(), 100);
+    }
+</script>
