@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'alamana-jo-production-secret-key-change-this'
 DEBUG = False
-ALLOWED_HOSTS = ['alamanajo.eu', 'www.alamanajo.eu', '207.180.232.225']
+ALLOWED_HOSTS = ['alamanajo.eu', 'www.alamanajo.eu', '62.169.19.39']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
